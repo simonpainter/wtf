@@ -151,6 +151,13 @@ Current coverage includes:
 - no-prior-command behavior
 - install script behavior and idempotency
 
+## Contributing and community
+
+- See [CONTRIBUTING.md](CONTRIBUTING.md) for development and PR guidance.
+- See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community expectations.
+- See [SECURITY.md](SECURITY.md) for responsible vulnerability reporting.
+- This project is licensed under the [MIT License](LICENSE).
+
 ## Uninstall
 
 ```sh

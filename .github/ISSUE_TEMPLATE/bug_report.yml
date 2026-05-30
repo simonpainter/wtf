@@ -1,0 +1,72 @@
+name: Bug report
+description: Report a reproducible bug
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug report.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+      placeholder: Short description of the problem
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Exact steps to reproduce the issue
+      placeholder: |
+        1. Run ...
+        2. Then run ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: What did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: What actually happened?
+    validations:
+      required: true
+  - type: input
+    id: shell
+    attributes:
+      label: Shell
+      description: bash or zsh (include version if possible)
+      placeholder: zsh 5.9
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: macOS 15.5 / Ubuntu 24.04
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Relevant configuration
+      description: Any relevant `WTF_*` environment variables
+      placeholder: |
+        WTF_AGENT=...
+        WTF_TIMEOUT=...
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output
+      description: Paste command output or stderr snippet
+      render: shell
