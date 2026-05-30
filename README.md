@@ -1,84 +1,137 @@
 # wtf
 
-When a command fails, type `wtf` and get a one-paragraph explanation of what
-went wrong and how to fix it. It grabs the last command, its error output, and
-its exit status, then sends them to whichever agent CLI you have installed —
-**Claude Code**, **GitHub Copilot CLI**, or **opencode** — and prints the answer.
+`wtf` explains why your last shell command failed and what to do next.
 
-```
+It captures:
+
+- the command text
+- its exit status
+- the command's stderr (cleaned of terminal control sequences)
+
+Then it sends that context to an installed agent CLI (**opencode**, **GitHub Copilot CLI**, or **Claude Code**) and prints a short plain-English answer.
+
+## Example
+
+```sh
 $ docker run myimage
 docker: Error response from daemon: No such image: myimage:latest
 $ wtf
-Asking claude…
-Docker can't find a local image called "myimage" because it hasn't been built
-or pulled yet. Build it with `docker build -t myimage .` from the directory with
-your Dockerfile, or `docker pull myimage` if it lives in a registry.
+Asking opencode…
+Docker can't find a local image called "myimage" because it hasn't been built or pulled yet. Build it with `docker build -t myimage .` from the directory with your Dockerfile, or `docker pull myimage` if it exists in a registry.
 ```
-
-A shell-only reimplementation of [ryanbastic/wtf](https://codeberg.org/ryanbastic/wtf),
-routed through an agent CLI instead of the Claude API, so it uses your existing
-auth and needs no API key. One file, no binary, no build step.
 
 ## Requirements
 
-- zsh or bash, on macOS or Linux
-- One of these on your `PATH`: `claude`, `copilot`, or `opencode`
-- Standard tools that are already present: `sed`, `tail`, `tr`, `stat`
+- macOS or Linux
+- zsh or bash
+- one agent CLI on your `PATH`: `opencode`, `copilot`, or `claude`
+- standard utilities: `sed`, `tail`, `tr`, and `stat` (or compatible equivalents)
 
 ## Install
+
+### Recommended
 
 ```sh
 ./install.sh
 ```
 
-That copies `wtf.sh` to `~/.wtf.sh` and adds a source line to `~/.zshrc` (and
-`~/.bashrc` if it exists). Then open a new shell.
+This does the following:
 
-Or do it by hand:
+1. Copies `wtf.sh` to `~/.wtf.sh`
+2. Ensures `~/.zshrc` exists and adds:
+   ```sh
+   [ -f ~/.wtf.sh ] && . ~/.wtf.sh
+   ```
+3. Adds the same line to `~/.bashrc` only if `.bashrc` already exists
+
+Open a new shell (or run `. ~/.wtf.sh`) after installing.
+
+### Manual
 
 ```sh
 cp wtf.sh ~/.wtf.sh
-echo '[ -f ~/.wtf.sh ] && . ~/.wtf.sh' >> ~/.zshrc   # or ~/.bashrc
+echo '[ -f ~/.wtf.sh ] && . ~/.wtf.sh' >> ~/.zshrc
 ```
 
 ## Usage
 
-Run a command, and if it misbehaves, type `wtf`.
+Run any command as usual. If it fails or behaves unexpectedly, run:
+
+```sh
+wtf
+```
+
+If no prior command has been captured yet, `wtf` exits with:
+
+```text
+Nothing to explain yet — run a command first, then type wtf.
+```
 
 ## Configuration
 
-Optional environment variables:
+All configuration is via environment variables.
 
-- `WTF_AGENT` — force a specific agent (`claude`, `copilot`, or `opencode`).
-  Otherwise it auto-detects in the order opencode → copilot → claude; edit the
-  `for a in …` line in `wtf.sh` to change priority.
-- `WTF_TIMEOUT` — seconds to wait for the agent (default 90; `0` disables).
-  Only applied if `timeout` or `gtimeout` is on the system; macOS has neither
-  by default, so it runs without a timeout there unless you've installed
-  coreutils (`brew install coreutils` provides `gtimeout`).
+| Variable | Default | Description |
+| --- | --- | --- |
+| `WTF_AGENT` | auto-detect | Force one of `opencode`, `copilot`, or `claude`. If set to an unavailable CLI, auto-detection is used instead. |
+| `WTF_TIMEOUT` | `90` | Seconds to allow the agent command to run. Set to `0` to disable. |
+
+### Agent selection order
+
+If `WTF_AGENT` is not set, agent detection order is:
+
+1. `opencode`
+2. `copilot`
+3. `claude`
+
+If you have multiple agent CLIs installed, you can switch explicitly. For example, to force GitHub Copilot CLI:
+
+```sh
+export WTF_AGENT="copilot"
+```
+
+### Timeout behavior
+
+- Timeout is enforced only when `timeout` or `gtimeout` is installed.
+- On macOS, `gtimeout` is usually available via GNU coreutils:
+  ```sh
+  brew install coreutils
+  ```
+- If timeout is reached, `wtf` exits with a timeout message.
 
 ## How it works
 
-- The shim permanently tees your shell's stderr to a per-session temp file.
-- A `preexec` hook (zsh) or `DEBUG` trap (bash) records each command and the
-  byte offset where its stderr begins. A `precmd`/`PROMPT_COMMAND` hook then
-  slices from that offset to capture only that command's error output, plus its
-  exit status. The snapshot is skipped when the command is `wtf` itself, so it
-  always reflects the last *real* command.
-- `wtf` reads the snapshot, strips terminal escape sequences, builds a short
-  prompt, finds an installed agent, and runs it once non-interactively
-  (`claude -p`, `copilot -p … -s`, or `opencode run …`).
+1. `wtf.sh` tees shell stderr into a per-shell temp file (`/tmp` or `$TMPDIR`).
+2. A shell hook captures command start (command text + stderr byte offset).
+3. Another hook captures command end (exit status + stderr slice for that command).
+4. `wtf` builds a structured prompt and invokes one CLI command:
+   - `opencode run`
+   - `copilot -p ... -s`
+   - `claude -p`
+5. Output is cleaned and printed.
 
-It never re-runs the failed command.
+`wtf` does **not** rerun your original command.
 
-### Per-shell notes
+## Shell-specific notes
 
-- **bash** runs the `DEBUG` trap while the file is still sourcing, so the first
-  prompt cycle is used to discard anything captured during load (the `_WTF_PRIMED`
-  guard). zsh doesn't need this but the guard is harmless there.
-- The capture slices stderr *between* the pre- and post-command hooks, so prompt
-  redraw escape codes (which zsh writes to stderr) fall outside the slice; any
-  that do leak are stripped by the cleaner.
+- **zsh**: uses `preexec` and `precmd` hooks.
+- **bash**: uses a `DEBUG` trap and `PROMPT_COMMAND`.
+- A priming guard avoids capturing noise from initial shell startup.
+- `wtf` itself is excluded from capture so it always explains the last real command.
+
+## Tests
+
+A small shell test suite is included at:
+
+```sh
+./tests/test.sh
+```
+
+Current coverage includes:
+
+- agent selection (forced and auto-detect order)
+- no-prior-command behavior
+- install script behavior and idempotency
 
 ## Uninstall
 
@@ -86,4 +139,8 @@ It never re-runs the failed command.
 rm ~/.wtf.sh
 ```
 
-Then remove the `wtf.sh` source line from your `~/.zshrc` / `~/.bashrc`.
+Then remove this line from your shell rc files:
+
+```sh
+[ -f ~/.wtf.sh ] && . ~/.wtf.sh
+```
