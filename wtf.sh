@@ -9,7 +9,7 @@
 #     source ~/.wtf.sh
 #
 # Config (all optional, via environment):
-#   WTF_AGENT    force one of: claude | copilot | opencode (else auto-detect)
+#   WTF_AGENT    force one of: claude | copilot | opencode | codex (else auto-detect)
 #   WTF_TIMEOUT  seconds to wait for the agent (default 90; 0 disables; only
 #                applied if `timeout`/`gtimeout` is available)
 
@@ -59,11 +59,11 @@ _wtf_run() {
 # Echo the agent to use, or return 1 if none found.
 _wtf_pick() {
   case "$WTF_AGENT" in
-    claude|copilot|opencode)
+    claude|copilot|opencode|codex)
       command -v "$WTF_AGENT" >/dev/null 2>&1 && { printf '%s' "$WTF_AGENT"; return 0; } ;;
   esac
   local a
-  for a in opencode copilot claude; do      # detection order; edit to taste
+  for a in opencode copilot claude codex; do      # detection order; edit to taste
     command -v "$a" >/dev/null 2>&1 && { printf '%s' "$a"; return 0; }
   done
   return 1
@@ -101,7 +101,7 @@ wtf() {
   fi
   local agent
   agent=$(_wtf_pick) || {
-    echo "No supported agent CLI found (claude, copilot, or opencode)." >&2
+    echo "No supported agent CLI found (claude, copilot, opencode, or codex)." >&2
     echo "Install one, or set WTF_AGENT to force a choice." >&2
     return 1
   }
@@ -122,6 +122,7 @@ wtf() {
     claude)   answer=$(_wtf_run claude -p "$prompt" 2>&1) ;;
     copilot)  answer=$(_wtf_run copilot -p "$prompt" -s 2>&1) ;;
     opencode) answer=$(_wtf_run opencode run "$prompt" 2>&1) ;;
+    codex)    answer=$(_wtf_run codex "$prompt" 2>&1) ;;
   esac
   local rc=$?
 
