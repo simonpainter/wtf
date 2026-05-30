@@ -20,12 +20,6 @@ Asking opencode…
 Docker can't find a local image called "myimage" because it hasn't been built or pulled yet. Build it with `docker build -t myimage .` from the directory with your Dockerfile, or `docker pull myimage` if it exists in a registry.
 ```
 
-## Demo
-
-A short screen recording showing `wtf` in use:
-
-[Watch the demo](assets/wtf-demo.mov)
-
 ## Requirements
 
 - macOS or Linux
