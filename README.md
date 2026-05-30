@@ -10,6 +10,22 @@ It captures:
 
 Then it sends that context to an installed agent CLI (**opencode**, **GitHub Copilot CLI**, or **Claude Code**) and prints a short plain-English answer.
 
+## Inspiration and approach differences
+
+This project is directly inspired by:
+
+- https://codeberg.org/ryanbastic/wtf
+- https://github.com/bendusz/wtf
+- Original post: https://www.linkedin.com/feed/update/urn:li:activity:7464652533538631680/
+
+The three versions share the same core idea (explain terminal failures quickly), but take different approaches:
+
+| Version | Core approach |
+| --- | --- |
+| **This repo (`simonpainter/wtf`)** | Captures command context from shell hooks and captured stderr without re-running the command, then routes to one of multiple CLIs (`opencode`, `copilot`, `claude`). Focus is portable shell-only implementation, multi-agent support, and predictable "explain only" behavior. |
+| **`ryanbastic/wtf` (Codeberg)** | Minimal, Claude-first implementation of the original "type `wtf` after failure" flow. Emphasizes simplicity and fast setup around captured last-command context. |
+| **`bendusz/wtf` (GitHub)** | Safety-gated re-run model: it can re-execute the last command (allowlist + prompts) to capture fresh output, and optionally propose/run a fix (`--fix`) after confirmation. Emphasizes controlled automation and remediation workflow. |
+
 ## Example
 
 ```sh
