@@ -8,7 +8,7 @@ It captures:
 - its exit status
 - the command's stderr (cleaned of terminal control sequences)
 
-Then it sends that context to an installed agent CLI (**opencode**, **GitHub Copilot CLI**, or **Claude Code**) and prints a short plain-English answer.
+Then it sends that context to an installed agent CLI (**opencode**, **GitHub Copilot CLI**, **Claude Code**, or **OpenAI Codex**) and prints a short plain-English answer.
 
 ## Inspiration and approach differences
 
@@ -40,7 +40,7 @@ Docker can't find a local image called "myimage" because it hasn't been built or
 
 - macOS or Linux
 - zsh or bash
-- one agent CLI on your `PATH`: `opencode`, `copilot`, or `claude`
+- one agent CLI on your `PATH`: `opencode`, `copilot`, `claude`, or `codex`
 - standard utilities: `sed`, `tail`, `tr`, and `stat` (or compatible equivalents)
 
 ## Install
@@ -89,7 +89,7 @@ All configuration is via environment variables.
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `WTF_AGENT` | auto-detect | Force one of `opencode`, `copilot`, or `claude`. If set to an unavailable CLI, auto-detection is used instead. |
+| `WTF_AGENT` | auto-detect | Force one of `opencode`, `copilot`, `claude`, or `codex`. If set to an unavailable CLI, auto-detection is used instead. |
 | `WTF_TIMEOUT` | `90` | Seconds to allow the agent command to run. Set to `0` to disable. |
 
 ### Agent selection order
@@ -99,11 +99,12 @@ If `WTF_AGENT` is not set, agent detection order is:
 1. `opencode`
 2. `copilot`
 3. `claude`
+4. `codex`
 
-If you have multiple agent CLIs installed, you can switch explicitly. For example, to force GitHub Copilot CLI:
+If you have multiple agent CLIs installed, you can switch explicitly. For example, to force OpenAI Codex:
 
 ```sh
-export WTF_AGENT="copilot"
+export WTF_AGENT="codex"
 ```
 
 ### Timeout behavior
@@ -124,6 +125,7 @@ export WTF_AGENT="copilot"
    - `opencode run`
    - `copilot -p ... -s`
    - `claude -p`
+   - `codex`
 5. Output is cleaned and printed.
 
 `wtf` does **not** rerun your original command.
