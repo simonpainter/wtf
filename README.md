@@ -10,6 +10,12 @@ It captures:
 
 Then it sends that context to an installed agent CLI (**opencode**, **GitHub Copilot CLI**, **Claude Code**, or **OpenAI Codex**) and prints a short plain-English answer.
 
+## Explainer video
+
+<video src="./media/wtf-explainer.mp4" controls playsinline muted></video>
+
+If your Markdown renderer does not support inline video playback, you can [open the video directly](./media/wtf-explainer.mp4).
+
 ## Inspiration and approach differences
 
 This project is directly inspired by:
