@@ -40,7 +40,7 @@ Docker can't find a local image called "myimage" because it hasn't been built or
 
 - macOS or Linux
 - zsh or bash
-- one agent CLI on your `PATH`: `opencode`, `copilot`, `claude`, or `codex`
+- one agent CLI on your `PATH`: `opencode`, `copilot`, `claude`, `codex`, or `apfel`
 - standard utilities: `sed`, `tail`, `tr`, and `stat` (or compatible equivalents)
 
 ## Install
@@ -89,7 +89,7 @@ All configuration is via environment variables.
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `WTF_AGENT` | auto-detect | Force one of `opencode`, `copilot`, `claude`, or `codex`. If set to an unavailable CLI, auto-detection is used instead. |
+| `WTF_AGENT` | auto-detect | Force one of `opencode`, `copilot`, `claude`, `codex`, or `apfel`. If set to an unavailable CLI, auto-detection is used instead. |
 | `WTF_TIMEOUT` | `90` | Seconds to allow the agent command to run. Set to `0` to disable. |
 
 ### Agent selection order
@@ -100,6 +100,7 @@ If `WTF_AGENT` is not set, agent detection order is:
 2. `copilot`
 3. `claude`
 4. `codex`
+5. `apfel`
 
 If you have multiple agent CLIs installed, you can switch explicitly. For example, to force OpenAI Codex:
 
@@ -126,6 +127,7 @@ export WTF_AGENT="codex"
    - `copilot -p ... -s`
    - `claude -p`
    - `codex`
+   - `apfel`
 5. Output is cleaned and printed.
 
 `wtf` does **not** rerun your original command.
